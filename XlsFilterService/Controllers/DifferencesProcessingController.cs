@@ -8,12 +8,30 @@ namespace XlsFilterService.Controllers;
 [Route("differences")]
 public class DifferencesProcessingController : ControllerBase
 {
-    [HttpPost(Name = "UploadFile")]
-    public IEnumerable<IndicatorsDifference> UploadFile(IFormFile file)
+    [HttpPost("upload", Name = "UploadFile")]
+    public DifferencesTable UploadFile(IFormFile file)
     {
-        return new DifferencesLoaderFactory(file.FileName.Split('.').Last())
+        using var stream = file.OpenReadStream();
+
+        return new DifferencesStreamerFactory(file.FileName.Split('.').Last())
             .Create()
-            .Parse(file.OpenReadStream())
-            .Where(diff => diff.HasYearDifference);
+            .Parse(stream)
+            .OnlyHasYearDifference();
+    }
+
+    [HttpPost("download", Name = "DownloadFile")]
+    public FileStreamResult DownloadFile(DifferencesTable differences)
+    {
+        var stream = new DifferencesStreamerFactory(differences.FileType)
+            .Create()
+            .Dump(differences);
+        
+        stream.Position = 0;
+        
+        return File(
+            stream,
+            "application/octet-stream",
+            "result.xls"
+        );
     }
 }

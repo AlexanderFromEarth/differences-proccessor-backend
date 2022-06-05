@@ -1,22 +1,22 @@
-using XlsFilterService.Loaders;
+using XlsFilterService.Streamers;
 using XlsFilterService.Models;
 
 namespace XlsFilterService.Factories;
 
-public class DifferencesLoaderFactory
+public class DifferencesStreamerFactory
 {
     public string Type { get; }
     
-    public DifferencesLoaderFactory(string type)
+    public DifferencesStreamerFactory(string type)
     {
         this.Type = type;
     }
 
-    public IDifferencesLoader Create()
+    public IDifferencesStreamer Create()
     {
         return this.Type switch
         {
-            "xls" => new XlsDifferencesLoader(),
+            "xls" => new XlsDifferencesStreamer(),
             _ => throw new Exception()
         };
     }
